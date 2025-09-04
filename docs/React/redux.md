@@ -48,7 +48,7 @@ import { createStore } from 'redux' // 引入一个第三方的方法
 const store = createStore() // 创建数据的公共存储区域（管理员）
 ```
 
-还需要创建一个记录本去辅助管理数据，也就是`reduecer`，本质就是一个函数，接收两个参数`state`，`action`，返回`state`
+还需要创建一个记录本去辅助管理数据，也就是`reducer`，本质就是一个函数，接收两个参数`state`，`action`，返回`state`
 
 ```js
 // 设置默认值
