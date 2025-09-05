@@ -96,7 +96,9 @@ function shallowEqual(objA: mixed, objB: mixed): boolean {
 
 ### React.memo
 
-`React.memo`用来缓存组件的渲染，避免不必要的更新，其实也是一个高阶组件，与 `PureComponent` 十分类似。但不同的是， `React.memo` 只能用于函数组件
+`React.memo`用来缓存组件的渲染，让它只在 `props` 发生变化时才重新渲染，避免不必要的更新。它默认采用浅比较（shallow compare）新旧 `props`，若相等便跳过函数组件的重新渲染。
+
+其实也是一个高阶组件，与 `PureComponent` 十分类似。但不同的是， `React.memo` 只能用于函数组件
 
 ```jsx
 import { memo } from 'react';
@@ -119,6 +121,73 @@ function arePropsEqual(prevProps, nextProps) {
 export default memo(Button, arePropsEqual);
 ```
 
+### useMemo
+
+useMemo 是一个 Hook，用来缓存“函数执行的结果值”。如果依赖数组(dependencies)中的值未发生变化，它会跳过重新计算，直接返回上一轮的缓存值。
+
+当有复杂逻辑或数据处理时，使用 useMemo 可以避免每次渲染都重复执行。
+
+```jsx
+const memoizedValue = useMemo(() => computeExpensive(input), [input]);
+```
+
+### useCallback
+
+useCallback 也是一个 Hook，用来缓存函数。它返回一个缓存后的函数引用。如果依赖未发生变化，它返回的是同一个函数引用。
+
+使用场景：
+
+假设你有一个被 React.memo 包裹 的子组件 Button：
+
+```jsx
+const Button = React.memo(function Button({ onClick, children }) {
+  console.log("Button render");
+  return <button onClick={onClick}>{children}</button>;
+});
+```
+
+父组件：
+
+```jsx
+function App() {
+  const [count, setCount] = React.useState(0);
+
+  const handleClick = () => {
+    console.log("clicked");
+  };
+
+  return (
+    <div>
+      <p>{count}</p>
+      <button onClick={() => setCount(c => c + 1)}>+1</button>
+      <Button onClick={handleClick}>child button</Button>
+    </div>
+  );
+}
+```
+
+父组件每次渲染时都会新建一个 handleClick 函数。这样一来，即使父组件内的 count 变化与子组件无关，这仍然会导致 onClick 这个传递到子组件的 prop 引用发生变化，最终导致不必要的重新渲染。
+
+这种情况下，我们可以用 useCallback 包装函数，使传递到子组件的 prop 永远是相同的函数引用，避免多余的渲染。
+
+```jsx
+function App() {
+  const [count, setCount] = React.useState(0);
+
+  // 用 useCallback 包装函数：依赖数组为空 → 永远返回同一个函数引用
+  const handleClick = React.useCallback(() => {
+    console.log("clicked");
+  }, []);
+
+  return (
+    <div>
+      <p>{count}</p>
+      <button onClick={() => setCount(c => c + 1)}>+1</button>
+      <Button onClick={handleClick}>child button</Button>
+    </div>
+  );
+}
+```
 
 ## 三、总结
 
