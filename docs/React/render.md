@@ -109,7 +109,7 @@ class Foo extends React.Component {
 }
 ```
 
-点击按钮，则调用`setState`方法，无论`count`发生变化辩护，控制台都会输出`Foo render`，证明`render`执行了
+点击按钮，则调用`setState`方法，无论`count`是否发生变化，控制台都会输出`Foo render`，证明`render`执行了
 
 - 函数组件通过`useState hook`修改状态
 
